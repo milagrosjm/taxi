@@ -1,5 +1,6 @@
 package com.solvd.taxi;
 
+import java.io.IOException;
 import java.time.*;
 import java.util.*;
 
@@ -20,6 +21,8 @@ import com.solvd.taxi.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.solvd.taxi.FileAnalysis;
+
 public class Main {
 
 
@@ -27,8 +30,8 @@ public class Main {
 
     public static void main(String[] args) {
 
-    Car taxi1 = new Car("EJL768", "Corsa");
-    Motocycle moto = new Motocycle("EJL123", "Honda");
+    Car taxi1 = new Car("EJL768", "Corsa",  Set.of(VehicleFeature.AIR_CONDITIONING, VehicleFeature.PET_FRIENDLY));
+    Motocycle moto = new Motocycle("EJL123", "Honda", Set.of());
     Vehicle [] vehicles = {taxi1, moto};
     PointLocation locationDriver = new PointLocation(3.444, 100.333);
     Driver driver1 = new Driver(
@@ -40,7 +43,8 @@ public class Main {
     "jorgemoreno@gmail.com", 
     vehicles, 
     DriverStatus.AVAILABLE, 
-    locationDriver);
+    locationDriver,
+    DriverRating.FOUR_STARS);
     
     Map<Driver, Vehicle[]> driverVehicles = new HashMap<>();
     driverVehicles.put(driver1, vehicles);
@@ -105,6 +109,16 @@ public class Main {
     } catch (InvalidLocation e){
         LOGGER.error(e.getMessage());
     } catch (InvalidPricing e){
+        LOGGER.error(e.getMessage());
+    }
+    
+    try{
+        FileAnalysis.countWordsFromFile(
+            "src/main/resources/input.txt",
+            "src/main/resources/output.txt",
+            Arrays.asList("QA", "testing","tester")
+        );
+    } catch (IOException e) {
         LOGGER.error(e.getMessage());
     }
 

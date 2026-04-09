@@ -1,0 +1,20 @@
+What is a QA tester?
+A QA tester works with software or a website to ensure it runs properly. In this job, you will try to prevent faulty apps or other technology glitches, which can diminish the customer experience. QA testers accomplish this by running various manual and automated tests while the product is in development. The goal is to try and break the product or force it to malfunction. It empowers developers with the knowledge to make product adjustments before it goes to market.
+
+What do QA testers do?
+QA testing is an essential part of the software development life cycle. It ensures that an organization's product is as high-quality as possible. As a QA tester, you will contribute to the organizations you work for in the following ways:
+
+
+QA saves time and increases efficiency: QA testing throughout the development process can help you identify issues early on. Fixing bugs and other problems early in a product’s life cycle can be much less complicated. It is also easier for developers to adjust code they have worked on recently.
+
+
+QA testers help protect brand reputation. They use their skills to anticipate what might go wrong and prevent problems. This prevents a business from releasing a product that glitches, crashes when too many people use it at once, or otherwise provides a negative user experience (UX).
+
+
+QA testing allows products to grow safely: Scalability is essential to QA testers. A crucial part of your role is to ensure that added features won't compromise security or UX. With effective testing, you'll have a product ready to launch and scale later.
+
+
+QA is essential to product safety: QA testers ensure the product meets user expectations and government and industry guidelines. You will follow specific procedures to test, document, evaluate, and report your findings.
+
+A day in the life of a QA tester
+QA testing typically occurs in cycles throughout the product’s development. Your job as a tester involves several responsibilities. First, whether you're doing manual or automated testing, you’ll need to know how to plan to test, develop and execute test cases, and evaluate and document test results. Along with reviewing test procedures and developing scripts, you’ll research new technologies, tools, and testing procedures. Working closely with the product and development team and other stakeholders in QA processes, you'll ensure a product is of excellent quality and low risk.
