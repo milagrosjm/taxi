@@ -8,30 +8,28 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import java.util.stream.Collectors;
+
 public class FileAnalysis {
 
     public static void countWordsFromFile(String inputPath, String outputPath, List<String> wordsToCount) throws IOException {
 
         File pathInputFile = new File(inputPath);
 
-        String text = FileUtils.readFileToString(pathInputFile, StandardCharsets.UTF_8);
-        text = text.toLowerCase();
+        final String text = FileUtils.readFileToString(pathInputFile, StandardCharsets.UTF_8).toLowerCase();
 
-        Map<String, Integer> wordCount = new HashMap<>();
+        Map<String, Integer> wordCount = wordsToCount.stream().collect(Collectors.toMap(
+                        word -> word,
+                        word -> StringUtils.countMatches(text, word.toLowerCase())));
 
         for (String word : wordsToCount) {
             int count = StringUtils.countMatches(text, word.toLowerCase());
             wordCount.put(word, count);
         }
 
-        StringBuilder result = new StringBuilder();
-        for (Map.Entry<String, Integer> entry : wordCount.entrySet()) {
-            result.append(entry.getKey())
-                  .append(": ")
-                  .append(entry.getValue())
-                  .append("\n");
-        }
-        result.append("------\n");
+        String result = wordCount.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining("\n", "", "\n------\n"));
 
         File outputFile = new File(outputPath);
         FileUtils.writeStringToFile(outputFile, result.toString(), StandardCharsets.UTF_8, true);

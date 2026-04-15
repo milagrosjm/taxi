@@ -5,6 +5,8 @@ import java.time.*;
 import java.util.*;
 
 import com.solvd.taxi.enums.*;
+import com.solvd.taxi.functionalInterface.DistanceCalculator;
+import com.solvd.taxi.functionalInterface.DiscountStrategy;
 import com.solvd.taxi.model.trip.*;
 import com.solvd.taxi.model.exception.DriverNotAvailable;
 import com.solvd.taxi.model.exception.InvalidLocation;
@@ -81,14 +83,34 @@ public class Main {
     Queue<RequestTrip> tripQueue = new LinkedList<>();
     tripQueue.add(request);
 
-    PriceCalculator priceCalculator = new PriceCalculator(150, -30);
+    DiscountStrategy nightDiscount = r -> {
+        int hour = r.getRequestTime().getHour();
+        return (hour >= 22) ? 50 : 0;
+    };
+
+    PriceCalculator priceCalculator = new PriceCalculator(150, 30, nightDiscount);
 
     Deque<Trip> tripHistory = new ArrayDeque<>();
 
-    TripService<Driver, RequestTrip, Trip> service = new TripService<>(priceCalculator);
+    DistanceCalculator euclidean = (a, b) -> {
+        double dx = a.getX() - b.getX();
+        double dy = a.getY() - b.getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    TripService<Driver, RequestTrip, Trip> service = new TripService<>(priceCalculator, euclidean);
     try {
         RequestTrip nextRequest = tripQueue.poll();
-        Trip trip = service.createTrip(nextRequest, drivers);
+        Trip trip = service.createTrip(nextRequest, drivers, ds ->
+            ds.stream()
+            .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
+            .findFirst()
+            .map(d -> {
+                d.setStatus(DriverStatus.OCCUPIED);
+                return d;
+            })
+            .orElseThrow(() -> new DriverNotAvailable("No drivers available"))
+        );
         tripHistory.push(trip);
         ServiceResult<Trip> result = new ServiceResult<>(trip, "Trip created successfully");
         Trip createdTrip = result.getData();

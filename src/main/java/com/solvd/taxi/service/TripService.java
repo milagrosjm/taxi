@@ -8,15 +8,20 @@ import com.solvd.taxi.model.person.Driver;
 import com.solvd.taxi.model.state.DriverAssignedState;
 import com.solvd.taxi.model.trip.*;
 import com.solvd.taxi.pricing.PriceCalculator;
+import com.solvd.taxi.functionalInterface.DistanceCalculator;
+import com.solvd.taxi.functionalInterface.DriverSelector;
+import com.solvd.taxi.functionalInterface.DiscountStrategy;
 
 import java.util.List;
 
 public class TripService <D extends Driver, R extends RequestTrip, T extends Trip> {
 
     private PriceCalculator priceCalculator;
+    private DistanceCalculator distanceCalculator;
 
-    public TripService(PriceCalculator priceCalculator){
+    public TripService(PriceCalculator priceCalculator, DistanceCalculator distanceCalculator){
         this.priceCalculator = priceCalculator;
+        this.distanceCalculator = distanceCalculator;
     }
 
     public PriceCalculator getPriceCalculator(){
@@ -27,15 +32,15 @@ public class TripService <D extends Driver, R extends RequestTrip, T extends Tri
         this.priceCalculator = priceCalculator;
     }
 
-    public T createTrip(R request, List<D> drivers) throws DriverNotAvailable, InvalidLocation, InvalidPricing {
+    public T createTrip(R request, List<D> drivers, DriverSelector<D> selector) throws DriverNotAvailable, InvalidLocation, InvalidPricing {
 
         int travelingTime = this.calculateTravelingTime(request.getPointA(), request.getPointB());
 
-        D driver = findDriver(drivers, request.getPointA());
+        D driver = selector.select(drivers);
 
         double distance = this.calculateDistance(request.getPointA(), request.getPointB());
 
-        double price = this.priceCalculator.calculatePrice(distance);
+        double price = this.priceCalculator.calculatePrice(distance, request);
 
         int waitingTime = this.calculateWaitingTime(driver, request.getPointA());
 
@@ -53,26 +58,21 @@ public class TripService <D extends Driver, R extends RequestTrip, T extends Tri
             throw new DriverNotAvailable("There are no drivers connected");
         }
 
-        for (D driver : drivers) {
-        if (driver.getStatus() == DriverStatus.AVAILABLE) {
-            driver.setStatus(DriverStatus.OCCUPIED);
-            return driver;
-        }
-    }
-        throw new DriverNotAvailable("There are no drivers available");
+        return drivers.stream()
+                .filter(d -> d.getStatus() == DriverStatus.AVAILABLE)
+                .findFirst()
+                .map(d -> {
+                    d.setStatus(DriverStatus.OCCUPIED);
+                    return d;
+                })
+                .orElseThrow(() -> new DriverNotAvailable("There are no drivers available"));
     }
 
-    private double calculateDistance (PointLocation pointA, PointLocation pointB) throws InvalidLocation{
-        
-        if (pointA == null || pointB == null) {
+    private double calculateDistance(PointLocation a, PointLocation b) throws InvalidLocation {
+        if (a == null || b == null) {
             throw new InvalidLocation("Location cannot be null");
         }
-        
-        double dx = pointA.getX() - pointB.getX();
-        double dy = pointA.getY() - pointB.getY();
-
-        return Math.sqrt(dx*dx + dy*dy);
-
+        return distanceCalculator.calculate(a, b);
     }
 
     private int calculateWaitingTime(D driver, PointLocation pointA) throws InvalidLocation{
